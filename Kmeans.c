@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+// #include <assert.h>
+// #define assertmsg(x, msg) assert(((void) msg, x))
 
 typedef struct linkedlist linkedlist;
 typedef linkedlist* link;
@@ -16,30 +18,40 @@ double compute_distance(double vec1[],double vec2[]);
 void reset_clusters(link head, double* mu[], double* new_sum[]);
 double calculating_epsilon(double *mu[], double *new_mu[]);
 void create_output(double *mu[], char op_filename[]);
+int get_len_linked_list(link head);
+int check_allocation(double* p);
 
 /*
  * missions:
- * 1. check if k is valid value
+ V 1. check if k is valid value
  * 2. check code on Nova
- * 3. change Linked List - add elements at start of the list
- * 4. there is note in the function - add_to_linked_list
+ * 3. change Linked List - add elements at start of the list (can add field for length instead of checking in seperated function)
+ V 4. there is note in the function - add_to_linked_list
  * 5. warning in function - create_linked_list
  * 6. warning in function - read_file - using atof
  * 7. warning in main - using atoi
- * 8. handle situation where we get name of input file
- * 9. die
+ V 8. handle situation where we get name of input file
+ V 9. test allocation of memory succeeded for each malloc/calloc
+ * 10. free memory that was define in dynamic memory allocation - check when we need to do that
+ * die
  */
+
 int main(int argc, char* argv[]) {
-    // assert(argc>=4);
     char* input_file = argv[2];
     char* output_file = argv[3];
     int max_iter = 200;
-    double *mu[k], eps, *new_mu[k];
-    int i,j;
-    link vectors_list = read_file("input_1.txt");
+    int i,j, N;
+    link vectors_list = read_file(input_file);
     k = atoi(argv[1]);
+    double *mu[k], eps, *new_mu[k];
     if (argc == 5){
         max_iter = atoi(argv[4]);
+    }
+    N = get_len_linked_list(vectors_list);
+    // assertmsg(k>1&&k<N, "Invalid Input!");
+    if (k<1 || k>N){
+        printf("Invalid Input!");
+        exit(1);
     }
     initialize(vectors_list, mu);
     for (i = 0; i < max_iter; ++i) {
@@ -54,6 +66,7 @@ int main(int argc, char* argv[]) {
         }
     }
     create_output(mu,output_file);
+    return 0;
 }
 
 // Defining the data structure Linked List
@@ -71,10 +84,11 @@ link create_linked_list(){
 // Add given vector to a given linked list
 void add_to_linked_list(link* head, double vec[]){
     link node = (link) malloc(sizeof (linkedlist));
+    if (node == NULL){
+        printf("An Error Has Occurred");
+        exit(1);
+    }
     link p;
-    // if(head->data == NULL){
-    //     head->data = vec;
-    // }
     node->next = NULL;
     node->data = vec;
     if (*head == NULL){
@@ -106,6 +120,7 @@ link read_file(char fileName[]){
         dimension = find_dimension(copy_buff);
         while ((ch != '\n') && (ch != EOF)) {
             vector = (double *)(malloc(dimension * sizeof (double)));
+            check_allocation(vector);
             place = vector;
             ptr = strtok(buff, ",");
             while (ptr != NULL) {
@@ -153,6 +168,7 @@ void initialize(link head, double* mu[]){
     double* vec;
     for (i = 0; i < k; ++i) {
         mu[i] = (double *)calloc(dimension, sizeof (double));
+        check_allocation(mu[i]);
         vec = head->data;
         mu[i] = vec;
         head = head->next;
@@ -181,6 +197,7 @@ void reset_clusters(link head, double* mu[], double* new_sum[]) {
 
     for (i = 0; i < k; ++i) {
         new_sum[i] = (double *) calloc(dimension, sizeof(double));
+        check_allocation(new_sum[i]);
         count[i] = 0;
     }
     while (head != NULL) {
@@ -236,3 +253,22 @@ void create_output(double *mu[], char op_filename[]){
     fclose(f);
 }
 
+// Compute the length of given linked list
+int get_len_linked_list(link head){
+    int cnt = 0;
+    while (head != NULL)
+    {
+        head = head->next;
+        cnt++;
+    }
+    return cnt;
+}
+
+// Check if allocation of memory worked for double pointer
+int check_allocation(double* p){
+    if (p == NULL){
+        printf("An Error Has Occurred");
+        exit(1);
+    }
+    return 0;
+}
