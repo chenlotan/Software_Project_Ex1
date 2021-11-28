@@ -23,7 +23,7 @@ int check_allocation(double* p);
 
 /*
  * missions:
- V 1. check if k is valid value
+ V 1. check if k is valid value - check maybe we can use assert instead
  * 2. check code on Nova
  * 3. change Linked List - add elements at start of the list (can add field for length instead of checking in seperated function)
  V 4. there is note in the function - add_to_linked_list
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
-        if (eps < 0.000001){
+        if (eps < 0.001){
             break;
         }
     }
@@ -96,10 +96,12 @@ void add_to_linked_list(link* head, double vec[]){
     }
     else {
         p = *head;
-        while (p->next != NULL)
-        {
-            p = p->next;
-        }
+        // while (p->next != NULL)
+        // {
+        //     p = p->next;
+        // }
+        // p->next = node;
+        node->next = p->next;
         p->next = node;
     }
 
