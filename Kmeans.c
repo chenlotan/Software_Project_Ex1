@@ -179,6 +179,7 @@ void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
             }
         }
     }
+    free(count);
 }
 
 double calculating_epsilon(double *mu[], double *new_mu[]){
