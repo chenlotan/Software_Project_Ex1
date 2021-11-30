@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     int i,j;
     double** vectors_list = read_file(input_file);
     k = (int )strtol(argv[1], NULL, 10);
-    double *mu[k], eps, *new_mu[k];
+    double eps, **new_mu, **mu;
     if (argc == 5){
         max_iter = (int )strtol(argv[4], NULL, 10);
     }
@@ -37,6 +37,8 @@ int main(int argc, char* argv[]) {
         printf("Invalid Input!");
         exit(1);
     }
+    mu = (double **)malloc(k * sizeof(double*));
+    new_mu = (double **)malloc(k * sizeof(double*));
     initialize(vectors_list, mu);
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
@@ -175,7 +177,6 @@ void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
             }
         }
     }
-    free(count);
 }
 
 double calculating_epsilon(double *mu[], double *new_mu[]){
