@@ -136,7 +136,8 @@ void initialize(double** vectors_list, double* mu[]){
 }
 
 int calc_argmin(double *mu[], double *vector){
-    double min_val = INFINITY, sum_p;
+    double infinity = INFINITY;
+    double min_val = infinity, sum_p;
     int min_mu = 0, i;
     for (i = 0; i < k; ++i) {
         sum_p = compute_distance(mu[i], vector);
