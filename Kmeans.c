@@ -39,7 +39,6 @@ int main(int argc, char* argv[]) {
     }
     initialize(vectors_list, mu);
     for (i = 0; i < max_iter; ++i) {
-        // double *new_mu[k];
         reset_clusters(vectors_list, mu, new_mu);
         eps = calculating_epsilon(mu, new_mu);
         for (j = 0; j < k; ++j) {
@@ -59,7 +58,6 @@ int main(int argc, char* argv[]) {
 
 
 
-// Returns a linked list with all the vectors from a given file name
 double** read_file(char fileName[]){
     FILE *file = fopen(fileName,"r");
     char buff[1024], copy_buff[1024], *ptr;
@@ -103,7 +101,6 @@ double** read_file(char fileName[]){
 
 }
 
-// Returns the distance between two given vectors
 double compute_distance(double vec1[], double vec2[]){
     double sum = 0, dist;
     int i;
@@ -114,7 +111,6 @@ double compute_distance(double vec1[], double vec2[]){
     return dist;
 }
 
-// Compute the dimension of the vectors in the file
 int find_dimension(char line[]){
     int i = 0;
     char *ptr = strtok(line, ",");
@@ -125,7 +121,6 @@ int find_dimension(char line[]){
     return i;
 }
 
-// Initializing the first k centroids from the list of all the vectors
 void initialize(double** vectors_list, double* mu[]){
     int i;
     double* vec;
@@ -137,7 +132,6 @@ void initialize(double** vectors_list, double* mu[]){
     }
 }
 
-// Returns the best centroid's index for a given vector
 int calc_argmin(double *mu[], double *vector){
     double min_val = INFINITY, sum_p;
     int min_mu = 0, i;
@@ -151,7 +145,6 @@ int calc_argmin(double *mu[], double *vector){
     return min_mu;
 }
 
-// Compute and return the new centroids
 void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
     int count[k];
     double *vec;
@@ -185,7 +178,6 @@ void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
     free(count);
 }
 
-// Calculating the new epsilon between the new centroids list to the old ones
 double calculating_epsilon(double *mu[], double *new_mu[]){
     double eps = 0, dist;
     int i;
@@ -198,7 +190,6 @@ double calculating_epsilon(double *mu[], double *new_mu[]){
     return eps;
 }
 
-// Writing to a given file name the centroids
 void create_output(double *mu[], char op_filename[]){
     FILE *f;
     int i,j;
@@ -216,7 +207,6 @@ void create_output(double *mu[], char op_filename[]){
 }
 
 
-// Check if allocation of memory worked for double pointer
 int check_allocation(const double* p){
     if (p == NULL){
         printf("An Error Has Occurred");
