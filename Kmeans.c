@@ -3,8 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-typedef struct linkedlist linkedlist;
-typedef linkedlist* link;
+
 int dimension, k, N;
 double** read_file(char fileName[]);
 int find_dimension(char line[]);
@@ -13,8 +12,7 @@ double compute_distance(double vec1[],double vec2[]);
 void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]);
 double calculating_epsilon(double *mu[], double *new_mu[]);
 void create_output(double *mu[], char op_filename[]);
-int get_len_linked_list(link head);
-int check_allocation(double* p);
+int check_allocation(const double* p);
 void free_memory(double** array, int len);
 
 /*
@@ -30,12 +28,12 @@ int main(int argc, char* argv[]) {
     char* input_file = argv[2];
     char* output_file = argv[3];
     int max_iter = 200;
-    int i,j,q;
+    int i,j;
     double** vectors_list = read_file(input_file);
-    k = (int )strtol(argv[1], '\0', 10);
+    k = (int )strtol(argv[1], NULL, 10);
     double *mu[k], eps, *new_mu[k];
     if (argc == 5){
-        max_iter = (int )strtol(argv[4], '\0', 10);
+        max_iter = (int )strtol(argv[4], NULL, 10);
     }
     if (k<1 || k>N){
         printf("Invalid Input!");
@@ -43,7 +41,7 @@ int main(int argc, char* argv[]) {
     }
     initialize(vectors_list, mu);
     for (i = 0; i < max_iter; ++i) {
-        double *new_mu[k];
+        // double *new_mu[k];
         reset_clusters(vectors_list, mu, new_mu);
         eps = calculating_epsilon(mu, new_mu);
         for (j = 0; j < k; ++j) {
@@ -67,11 +65,11 @@ int main(int argc, char* argv[]) {
 double** read_file(char fileName[]){
     FILE *file = fopen(fileName,"r");
     char buff[255], copy_buff[255], *ptr;
-    int ch, max_size = 100, n = 0; //--------max_size is the current size of all_vectors, n is the real amount of vectors we entered---------
+    int ch, max_size = 100, n = 0;  
     double* vector, *place;
-    double** all_vactors;
+    double** all_vectors;
     if (file) {
-        all_vactors = (double **)malloc(max_size * sizeof(double*));
+        all_vectors = (double **)malloc(max_size * sizeof(double*));
         ch = fscanf(file, "%s", buff);
         strcpy(copy_buff, buff);
         dimension = find_dimension(copy_buff);
@@ -81,24 +79,24 @@ double** read_file(char fileName[]){
             place = vector;
             ptr = strtok(buff, ",");
             while (ptr != NULL) {
-                *(vector) = atof(ptr);
+                *(vector) = strtod(ptr, NULL);
                 ptr = strtok(NULL, ",");
                 vector++;
             }
             if (n >= max_size){
-                max_size *= 1.5;
-                all_vactors = (double **) realloc(all_vactors, max_size * sizeof(double*));
+                max_size *= 2;
+                all_vectors = (double **) realloc(all_vectors, max_size * sizeof(double*));
             }
-            all_vactors[n] = place;
+            all_vectors[n] = place;
             n++;
             ch = fscanf(file, "%s", buff);
         }
         fclose(file);
         if (n<max_size){
-            all_vactors = (double **)realloc(all_vactors, n*sizeof(double*)); // ---------if we entered less veectors than cuurent size of all_vectors - realloc to array in size n---------------
+            all_vectors = (double **)realloc(all_vectors, n*sizeof(double*)); 
         }
         N = n;
-        return all_vactors;
+        return all_vectors;
     }
     else{
         printf("Invalid Input!");
@@ -156,7 +154,7 @@ int calc_argmin(double *mu[], double *vector){
 }
 
 // Compute and return the new centroids
-void reset_clusters(double** verctors_list, double* mu[], double* new_sum[]) {
+void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
     int count[k];
     double *vec;
     int i, t, j, r, s, q, min_mu;
@@ -167,9 +165,9 @@ void reset_clusters(double** verctors_list, double* mu[], double* new_sum[]) {
         count[i] = 0;
     }
     for (t = 0; t < N; t++) {
-        min_mu = calc_argmin(mu, verctors_list[t]);
+        min_mu = calc_argmin(mu, vectors_list[t]);
         count[min_mu]++;
-        vec = verctors_list[t];
+        vec = vectors_list[t];
         for (j = 0; j < dimension; ++j) {
             new_sum[min_mu][j] += *vec;
             vec++;
@@ -221,7 +219,7 @@ void create_output(double *mu[], char op_filename[]){
 
 
 // Check if allocation of memory worked for double pointer
-int check_allocation(double* p){
+int check_allocation(const double* p){
     if (p == NULL){
         printf("An Error Has Occurred");
         exit(1);
