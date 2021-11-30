@@ -17,10 +17,8 @@ void free_memory(double** array, int len);
 
 /*
  * missions:
- * 2. check code on Nova
- * 6. warning in function - read_file - using atof
- * 7. warning in main - using atoi
- * 9. check if memory got released 
+ * 1. check code on Nova
+ * 2. check if memory got released 
  * die
  */
 
@@ -64,7 +62,7 @@ int main(int argc, char* argv[]) {
 // Returns a linked list with all the vectors from a given file name
 double** read_file(char fileName[]){
     FILE *file = fopen(fileName,"r");
-    char buff[255], copy_buff[255], *ptr;
+    char buff[1024], copy_buff[1024], *ptr;
     int ch, max_size = 100, n = 0;  
     double* vector, *place;
     double** all_vectors;
