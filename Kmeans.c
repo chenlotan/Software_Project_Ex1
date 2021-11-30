@@ -27,9 +27,10 @@ int main(int argc, char* argv[]) {
     char* output_file = argv[3];
     int max_iter = 200;
     int i,j;
-    double** vectors_list = read_file(input_file);
+    double eps;
+    double **new_mu, **mu;
+    double **vectors_list = read_file(input_file);
     k = (int )strtol(argv[1], NULL, 10);
-    double eps, **new_mu, **mu;
     if (argc == 5){
         max_iter = (int )strtol(argv[4], NULL, 10);
     }
@@ -148,9 +149,10 @@ int calc_argmin(double *mu[], double *vector){
 }
 
 void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
-    int count[k];
+    int *count;
     double *vec;
     int i, t, j, r, s, q, min_mu;
+    count = calloc(k, sizeof(int));
 
     for (i = 0; i < k; ++i) {
         new_sum[i] = (double *) calloc(dimension, sizeof(double));
