@@ -5,6 +5,7 @@
 
 
 int dimension, k, N;
+float INFINITY;
 double** read_file(char fileName[]);
 int find_dimension(char line[]);
 void initialize(double** vectors_list, double* mu[]);
@@ -136,8 +137,7 @@ void initialize(double** vectors_list, double* mu[]){
 }
 
 int calc_argmin(double *mu[], double *vector){
-    double infinity = INFINITY;
-    double min_val = infinity, sum_p;
+    double min_val = INFINITY, sum_p;
     int min_mu = 0, i;
     for (i = 0; i < k; ++i) {
         sum_p = compute_distance(mu[i], vector);
