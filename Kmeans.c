@@ -2,37 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-// #include <assert.h>
-// #define assertmsg(x, msg) assert(((void) msg, x))
 
 typedef struct linkedlist linkedlist;
 typedef linkedlist* link;
-int dimension, k;
-
-link read_file(char fileName[]);
-void add_to_linked_list(link *head, double vec[]);
-link create_linked_list();
+int dimension, k, N;
+double** read_file(char fileName[]);
 int find_dimension(char line[]);
-void initialize(link head, double* mu[]);
+void initialize(double** vectors_list, double* mu[]);
 double compute_distance(double vec1[],double vec2[]);
-void reset_clusters(link head, double* mu[], double* new_sum[]);
+void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]);
 double calculating_epsilon(double *mu[], double *new_mu[]);
 void create_output(double *mu[], char op_filename[]);
 int get_len_linked_list(link head);
 int check_allocation(double* p);
+void free_memory(double** array, int len);
 
 /*
  * missions:
- V 1. check if k is valid value - check maybe we can use assert instead
  * 2. check code on Nova
- * 3. change Linked List - add elements at start of the list (can add field for length instead of checking in seperated function)
- V 4. there is note in the function - add_to_linked_list
- * 5. warning in function - create_linked_list
  * 6. warning in function - read_file - using atof
  * 7. warning in main - using atoi
- V 8. handle situation where we get name of input file
- V 9. test allocation of memory succeeded for each malloc/calloc
- * 10. free memory that was define in dynamic memory allocation - check when we need to do that
+ * 9. check if memory got released 
  * die
  */
 
@@ -40,15 +30,13 @@ int main(int argc, char* argv[]) {
     char* input_file = argv[2];
     char* output_file = argv[3];
     int max_iter = 200;
-    int i,j, N;
-    link vectors_list = read_file(input_file);
-    k = atoi(argv[1]);
+    int i,j,q;
+    double** vectors_list = read_file(input_file);
+    k = (int )strtol(argv[1], '\0', 10);
     double *mu[k], eps, *new_mu[k];
     if (argc == 5){
-        max_iter = atoi(argv[4]);
+        max_iter = (int )strtol(argv[4], '\0', 10);
     }
-    N = get_len_linked_list(vectors_list);
-    // assertmsg(k>1&&k<N, "Invalid Input!");
     if (k<1 || k>N){
         printf("Invalid Input!");
         exit(1);
@@ -61,62 +49,29 @@ int main(int argc, char* argv[]) {
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
-        if (eps < 0.001){
+        free_memory(new_mu, k);
+        if (eps < 0.000001){
             break;
         }
     }
     create_output(mu,output_file);
+    free_memory(vectors_list, N);
+    free_memory(mu, k);
     return 0;
 }
 
-// Defining the data structure Linked List
-struct linkedlist{
-    double *data;
-    struct linkedlist *next;
-};
-
-// Creating new linked list and returning the pointer to the head of the list
-link create_linked_list(){
-    link  head = NULL;
-    return head;
-}
-
-// Add given vector to a given linked list
-void add_to_linked_list(link* head, double vec[]){
-    link node = (link) malloc(sizeof (linkedlist));
-    if (node == NULL){
-        printf("An Error Has Occurred");
-        exit(1);
-    }
-    link p;
-    node->next = NULL;
-    node->data = vec;
-    if (*head == NULL){
-        *head = node;
-    }
-    else {
-        p = *head;
-        // while (p->next != NULL)
-        // {
-        //     p = p->next;
-        // }
-        // p->next = node;
-        node->next = p->next;
-        p->next = node;
-    }
 
 
-}
 
 // Returns a linked list with all the vectors from a given file name
-link read_file(char fileName[]){
+double** read_file(char fileName[]){
     FILE *file = fopen(fileName,"r");
     char buff[255], copy_buff[255], *ptr;
-    link list_of_vectors;
-    int ch;
+    int ch, max_size = 100, n = 0; //--------max_size is the current size of all_vectors, n is the real amount of vectors we entered---------
     double* vector, *place;
+    double** all_vactors;
     if (file) {
-        list_of_vectors = create_linked_list();
+        all_vactors = (double **)malloc(max_size * sizeof(double*));
         ch = fscanf(file, "%s", buff);
         strcpy(copy_buff, buff);
         dimension = find_dimension(copy_buff);
@@ -130,16 +85,26 @@ link read_file(char fileName[]){
                 ptr = strtok(NULL, ",");
                 vector++;
             }
-            add_to_linked_list(&list_of_vectors, place);
+            if (n >= max_size){
+                max_size *= 1.5;
+                all_vactors = (double **) realloc(all_vactors, max_size * sizeof(double*));
+            }
+            all_vactors[n] = place;
+            n++;
             ch = fscanf(file, "%s", buff);
         }
         fclose(file);
-        return list_of_vectors;
+        if (n<max_size){
+            all_vactors = (double **)realloc(all_vactors, n*sizeof(double*)); // ---------if we entered less veectors than cuurent size of all_vectors - realloc to array in size n---------------
+        }
+        N = n;
+        return all_vactors;
     }
     else{
         printf("Invalid Input!");
         exit(1);
     }
+
 }
 
 // Returns the distance between two given vectors
@@ -165,15 +130,14 @@ int find_dimension(char line[]){
 }
 
 // Initializing the first k centroids from the list of all the vectors
-void initialize(link head, double* mu[]){
+void initialize(double** vectors_list, double* mu[]){
     int i;
     double* vec;
     for (i = 0; i < k; ++i) {
         mu[i] = (double *)calloc(dimension, sizeof (double));
         check_allocation(mu[i]);
-        vec = head->data;
+        vec = vectors_list[i];
         mu[i] = vec;
-        head = head->next;
     }
 }
 
@@ -192,25 +156,24 @@ int calc_argmin(double *mu[], double *vector){
 }
 
 // Compute and return the new centroids
-void reset_clusters(link head, double* mu[], double* new_sum[]) {
+void reset_clusters(double** verctors_list, double* mu[], double* new_sum[]) {
     int count[k];
     double *vec;
-    int i, j, r, s, q, min_mu;
+    int i, t, j, r, s, q, min_mu;
 
     for (i = 0; i < k; ++i) {
         new_sum[i] = (double *) calloc(dimension, sizeof(double));
         check_allocation(new_sum[i]);
         count[i] = 0;
     }
-    while (head != NULL) {
-        min_mu = calc_argmin(mu, head->data);
+    for (t = 0; t < N; t++) {
+        min_mu = calc_argmin(mu, verctors_list[t]);
         count[min_mu]++;
-        vec = head->data;
+        vec = verctors_list[t];
         for (j = 0; j < dimension; ++j) {
             new_sum[min_mu][j] += *vec;
             vec++;
         }
-        head = head->next;
     }
     for (r = 0; r < k; ++r) {
         if (count[r] == 0) {
@@ -223,6 +186,7 @@ void reset_clusters(link head, double* mu[], double* new_sum[]) {
             }
         }
     }
+    free(count);
 }
 
 // Calculating the new epsilon between the new centroids list to the old ones
@@ -255,16 +219,6 @@ void create_output(double *mu[], char op_filename[]){
     fclose(f);
 }
 
-// Compute the length of given linked list
-int get_len_linked_list(link head){
-    int cnt = 0;
-    while (head != NULL)
-    {
-        head = head->next;
-        cnt++;
-    }
-    return cnt;
-}
 
 // Check if allocation of memory worked for double pointer
 int check_allocation(double* p){
@@ -273,4 +227,13 @@ int check_allocation(double* p){
         exit(1);
     }
     return 0;
+}
+
+
+void free_memory(double** array, int len){
+    int q;
+    for (q=0; q<len; q++){      
+        free(array[q]); 
+    }
+    free(array);
 }
