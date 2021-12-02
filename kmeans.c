@@ -41,21 +41,28 @@ int main(int argc, char* argv[]) {
     }
     mu = (double **)malloc(k * sizeof(double*));
     new_mu = (double **)malloc(k * sizeof(double*));
+    printf("allocation of mu and new_mu\n");
     initialize(vectors_list, mu);
+    printf("initialize\n");
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
+        printf("reset clusters\n");
         eps = calculating_epsilon(mu, new_mu);
+        printf("calcuating eps\n");
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
         free_memory(new_mu, k);
+        printf("free memory new mu\n");
         if (eps < 0.000001){
             break;
         }
     }
     create_output(mu,output_file);
+    printf("create output\n");
     free_memory(vectors_list, N);
     free_memory(mu, k);
+    printf("free memory\n");
     return 0;
 }
 
