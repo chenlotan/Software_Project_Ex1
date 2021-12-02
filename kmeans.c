@@ -52,8 +52,6 @@ int main(int argc, char* argv[]) {
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
-        free_memory(new_mu, k);
-        printf("free memory new mu\n");
         if (eps < 0.000001){
             break;
         }
@@ -62,7 +60,7 @@ int main(int argc, char* argv[]) {
     printf("create output\n");
     free_memory(vectors_list, N);
     free_memory(mu, k);
-    printf("free memory\n");
+    free_memory(new_mu, k);
     return 0;
 }
 
