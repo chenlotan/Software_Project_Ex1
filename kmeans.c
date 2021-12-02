@@ -40,11 +40,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     mu = (double **)malloc(k * sizeof(double*));
+    new_mu = (double **)malloc(k * sizeof(double*));
     printf("allocation of mu and new_mu\n");
     initialize(vectors_list, mu);
     printf("initialize\n");
     for (i = 0; i < max_iter; ++i) {
-        new_mu = (double **)malloc(k * sizeof(double*));
         reset_clusters(vectors_list, mu, new_mu);
         printf("reset clusters\n");
         eps = calculating_epsilon(mu, new_mu);
