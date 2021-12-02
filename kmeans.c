@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     char* input_file = argv[2];
     char* output_file = argv[3];
     int max_iter = 200;
-    int i,j, q;
+    int i, j, q, r;
     double eps;
     double **new_mu, **mu;
     double **vectors_list = read_file(input_file);
@@ -41,27 +41,25 @@ int main(int argc, char* argv[]) {
     }
     mu = (double **)malloc(k * sizeof(double*));
     new_mu = (double **)malloc(k * sizeof(double*));
-    printf("allocation of mu and new_mu\n");
     initialize(vectors_list, mu);
-    printf("initialize\n");
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
-        printf("reset clusters\n");
         eps = calculating_epsilon(mu, new_mu);
-        printf("calcuating eps\n");
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
-        }
-        for (q=0; q<k; q++){
-            free(new_mu[q]);
         }
         if (eps < 0.000001){
             break;
         }
-        
+        printf("number : %d\n", i);
+        for(q=0; q<k; q++){
+            for(r=0; r<dimension; r++){
+                printf("%f,", new_mu[q][r]);
+            }
+            printf("\n");
+        }
     }
     create_output(mu,output_file);
-    printf("create output\n");
     free_memory(vectors_list, N);
     free_memory(mu, k);
     free_memory(new_mu, k);
