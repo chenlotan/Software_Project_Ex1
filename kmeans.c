@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
         if (eps < 0.000001){
             break;
         }
-        free_memory(new_mu, k);
+        free(new_mu);
         printf("free new_mu\n");
     }
     create_output(mu,output_file);
