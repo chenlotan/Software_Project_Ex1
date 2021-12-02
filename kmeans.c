@@ -45,11 +45,12 @@ int main(int argc, char* argv[]) {
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
         eps = calculating_epsilon(mu, new_mu);
+        printf("eps %f\n", eps);
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
         if (eps < 0.000001){
-            printf("epsilon is small");
+            printf("epsilon is small \n");
             break;
         }
         printf("number : %d\n", i);
@@ -196,6 +197,7 @@ double calculating_epsilon(double *mu[], double *new_mu[]){
     int i;
     for (i = 0; i < k; ++i) {
         dist = compute_distance(mu[i], new_mu[i]);
+        printf("dist is %f \n", dist);
         if (eps < dist){
             eps = dist;
         }
