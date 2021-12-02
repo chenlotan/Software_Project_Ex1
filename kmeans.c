@@ -194,7 +194,13 @@ void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
 
 double calculating_epsilon(double *mu[], double *new_mu[]){
     double eps = 0, dist;
-    int i;
+    int i, q, r;
+    for(q=0; q<k; q++){
+        for(r=0; r<dimension; r++){
+            printf("%f,", new_mu[q][r]);
+        }
+        printf("\n");
+    }
     for (i = 0; i < k; ++i) {
         dist = compute_distance(mu[i], new_mu[i]);
         printf("dist is %f \n", dist);
