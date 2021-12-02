@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     char* input_file = argv[2];
     char* output_file = argv[3];
     int max_iter = 200;
-    int i,j;
+    int i,j, q;
     double eps;
     double **new_mu, **mu;
     double **vectors_list = read_file(input_file);
@@ -55,7 +55,9 @@ int main(int argc, char* argv[]) {
         if (eps < 0.000001){
             break;
         }
-        printf("free new_mu\n");
+        for (q=0; q<k; q++){
+            free(new_mu[q]);
+        }
     }
     create_output(mu,output_file);
     printf("create output\n");
