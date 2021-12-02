@@ -52,18 +52,19 @@ int main(int argc, char* argv[]) {
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
-        if (eps < 0.000001){
-            break;
-        }
         for (q=0; q<k; q++){
             free(new_mu[q]);
         }
+        if (eps < 0.000001){
+            break;
+        }
+        
     }
     create_output(mu,output_file);
     printf("create output\n");
     free_memory(vectors_list, N);
     free_memory(mu, k);
-    
+    free_memory(new_mu, k);
     return 0;
 }
 
