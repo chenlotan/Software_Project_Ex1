@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
             mu[j] = new_mu[j];
         }
         if (eps < 0.000001){
+            printf("epsilon is small");
             break;
         }
         printf("number : %d\n", i);
