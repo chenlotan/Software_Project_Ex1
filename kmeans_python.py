@@ -1,5 +1,4 @@
 import math
-import compare_files
 
 
 # Main function - create the clusters from a given input
@@ -96,13 +95,7 @@ def create_output(mu, op_file_name):
         output.write("\n")
 
 
-k_means(3, "input_1.txt", 600)
+k_means(3, "input_1.txt", 100)
 k_means(7, "input_2.txt")
 k_means(15, "input_3.txt", 300)
-k_means(2, "input_all_zero.txt")
-
-print(compare_files.compare("output_input_1.txt", "output_1.txt"))
-print(compare_files.compare("output_input_2.txt", "output_2.txt"))
-print(compare_files.compare("output_input_3.txt", "output_3.txt"))
-
 
