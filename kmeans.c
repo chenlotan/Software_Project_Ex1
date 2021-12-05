@@ -5,63 +5,56 @@
 
 
 int dimension, k, N;
-float INFINITY;
-double** read_file(char fileName[]);
+
+
+double **read_file(char fileName[]);
+
 int find_dimension(char line[]);
-void initialize(double** vectors_list, double* mu[]);
-double compute_distance(double vec1[],double vec2[]);
-void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]);
+
+void initialize(double **vectors_list, double *mu[]);
+
+double compute_distance(double vec1[], double vec2[]);
+
+void reset_clusters(double **vectors_list, double *mu[], double *new_sum[]);
+
 double calculating_epsilon(double *mu[], double *new_mu[]);
+
 void create_output(double *mu[], char op_filename[]);
-int check_allocation(const double* p);
-void free_memory(double** array, int len);
 
-/*
- * missions:
- * 1. check code on Nova
- * 2. check if memory got released 
- * die
- */
+int check_allocation(const double *p);
 
-int main(int argc, char* argv[]) {
-    char* input_file = argv[2];
-    char* output_file = argv[3];
+void free_memory(double **array, int len);
+
+int main(int argc, char *argv[]) {
+    char *input_file = argv[argc - 2];
+    char *output_file = argv[argc - 1];
     int max_iter = 200;
-    int i, j, q, r;
+    int i, j;
     double eps;
     double **new_mu, **mu;
     double **vectors_list = read_file(input_file);
-    k = (int )strtol(argv[1], NULL, 10);
-    if (argc == 5){
-        max_iter = (int )strtol(argv[4], NULL, 10);
+    k = (int) strtol(argv[1], NULL, 10);
+    if (argc == 5) {
+        max_iter = (int) strtol(argv[2], NULL, 10);
     }
-    if (k<1 || k>N){
+    if (k < 1 || k > N) {
         printf("Invalid Input!");
         exit(1);
     }
-    mu = (double **)malloc(k * sizeof(double*));
-    new_mu = (double **)malloc(k * sizeof(double*));
+    mu = (double **) malloc(k * sizeof(double *));
+    new_mu = (double **) malloc(k * sizeof(double *));
     initialize(vectors_list, mu);
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
         eps = calculating_epsilon(mu, new_mu);
-        printf("eps %f\n", eps);
         for (j = 0; j < k; ++j) {
             mu[j] = new_mu[j];
         }
-        if (eps < 0.000001){
-            printf("epsilon is small \n");
+        if (eps < 0.000001) {
             break;
         }
-        printf("number : %d\n", i);
-        for(q=0; q<k; q++){
-            for(r=0; r<dimension; r++){
-                printf("%f,", new_mu[q][r]);
-            }
-            printf("\n");
-        }
     }
-    create_output(mu,output_file);
+    create_output(mu, output_file);
     free_memory(vectors_list, N);
     free_memory(mu, k);
     free_memory(new_mu, k);
@@ -69,21 +62,19 @@ int main(int argc, char* argv[]) {
 }
 
 
-
-
-double** read_file(char fileName[]){
-    FILE *file = fopen(fileName,"r");
+double **read_file(char fileName[]) {
+    FILE *file = fopen(fileName, "r");
     char buff[1024], copy_buff[1024], *ptr;
-    int ch, max_size = 100, n = 0;  
-    double* vector, *place;
-    double** all_vectors;
+    int ch, max_size = 100, n = 0;
+    double *vector, *place;
+    double **all_vectors;
     if (file) {
-        all_vectors = (double **)malloc(max_size * sizeof(double*));
+        all_vectors = (double **) malloc(max_size * sizeof(double *));
         ch = fscanf(file, "%s", buff);
         strcpy(copy_buff, buff);
         dimension = find_dimension(copy_buff);
         while ((ch != '\n') && (ch != EOF)) {
-            vector = (double *)(malloc(dimension * sizeof (double)));
+            vector = (double *) (malloc(dimension * sizeof(double)));
             check_allocation(vector);
             place = vector;
             ptr = strtok(buff, ",");
@@ -92,39 +83,38 @@ double** read_file(char fileName[]){
                 ptr = strtok(NULL, ",");
                 vector++;
             }
-            if (n >= max_size){
+            if (n >= max_size) {
                 max_size *= 2;
-                all_vectors = (double **) realloc(all_vectors, max_size * sizeof(double*));
+                all_vectors = (double **) realloc(all_vectors, max_size * sizeof(double *));
             }
             all_vectors[n] = place;
             n++;
             ch = fscanf(file, "%s", buff);
         }
         fclose(file);
-        if (n<max_size){
-            all_vectors = (double **)realloc(all_vectors, n*sizeof(double*)); 
+        if (n < max_size) {
+            all_vectors = (double **) realloc(all_vectors, n * sizeof(double *));
         }
         N = n;
         return all_vectors;
-    }
-    else{
+    } else {
         printf("Invalid Input!");
         exit(1);
     }
 
 }
 
-double compute_distance(double vec1[], double vec2[]){
+double compute_distance(double vec1[], double vec2[]) {
     double sum = 0, dist;
     int i;
-    for (i = 0; i < dimension; i++){
-        sum += (double)pow(vec1[i] - vec2[i], 2);
+    for (i = 0; i < dimension; i++) {
+        sum += (double) pow(vec1[i] - vec2[i], 2);
     }
-    dist = (double)pow(sum, 0.5);
+    dist = (double) pow(sum, 0.5);
     return dist;
 }
 
-int find_dimension(char line[]){
+int find_dimension(char line[]) {
     int i = 0;
     char *ptr = strtok(line, ",");
     while (ptr != NULL) {
@@ -134,23 +124,23 @@ int find_dimension(char line[]){
     return i;
 }
 
-void initialize(double** vectors_list, double* mu[]){
+void initialize(double **vectors_list, double *mu[]) {
     int i;
-    double* vec;
+    double *vec;
     for (i = 0; i < k; ++i) {
-        mu[i] = (double *)calloc(dimension, sizeof (double));
+        mu[i] = (double *) calloc(dimension, sizeof(double));
         check_allocation(mu[i]);
         vec = vectors_list[i];
         mu[i] = vec;
     }
 }
 
-int calc_argmin(double *mu[], double *vector){
-    double min_val = INFINITY, sum_p;
+int calc_argmin(double *mu[], double *vector) {
+    double min_val = HUGE_VAL, sum_p;
     int min_mu = 0, i;
     for (i = 0; i < k; ++i) {
         sum_p = compute_distance(mu[i], vector);
-        if (sum_p < min_val){
+        if (sum_p < min_val) {
             min_val = sum_p;
             min_mu = i;
         }
@@ -158,7 +148,7 @@ int calc_argmin(double *mu[], double *vector){
     return min_mu;
 }
 
-void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
+void reset_clusters(double **vectors_list, double *mu[], double *new_sum[]) {
     int *count;
     double *vec;
     int i, t, j, r, s, q, min_mu;
@@ -192,44 +182,37 @@ void reset_clusters(double** vectors_list, double* mu[], double* new_sum[]) {
     free(count);
 }
 
-double calculating_epsilon(double *mu[], double *new_mu[]){
+double calculating_epsilon(double *mu[], double *new_mu[]) {
     double eps = 0, dist;
-    int i, q, r;
-    for(q=0; q<k; q++){
-        for(r=0; r<dimension; r++){
-            printf("%f,", new_mu[q][r]);
-        }
-        printf("\n");
-    }
+    int i;
     for (i = 0; i < k; ++i) {
         dist = compute_distance(mu[i], new_mu[i]);
-        printf("dist is %f \n", dist);
-        if (eps < dist){
+        if (eps < dist) {
             eps = dist;
         }
     }
     return eps;
 }
 
-void create_output(double *mu[], char op_filename[]){
+void create_output(double *mu[], char op_filename[]) {
     FILE *f;
-    int i,j;
+    int i, j;
     f = fopen(op_filename, "w");
     for (i = 0; i < k; ++i) {
         for (j = 0; j < dimension; ++j) {
             fprintf(f, "%0.4f", mu[i][j]);
-            if (j != dimension - 1){
+            if (j != dimension - 1) {
                 fprintf(f, ",");
             }
         }
-        fprintf(f,"\n");
+        fprintf(f, "\n");
     }
     fclose(f);
 }
 
 
-int check_allocation(const double* p){
-    if (p == NULL){
+int check_allocation(const double *p) {
+    if (p == NULL) {
         printf("An Error Has Occurred");
         exit(1);
     }
@@ -237,10 +220,10 @@ int check_allocation(const double* p){
 }
 
 
-void free_memory(double** array, int len){
+void free_memory(double **array, int len) {
     int q;
-    for (q=0; q<len; q++){      
-        free(array[q]); 
+    for (q = 0; q < len; q++) {
+        free(array[q]);
     }
     free(array);
 }
