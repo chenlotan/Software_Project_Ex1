@@ -1,21 +1,11 @@
 import math
+import sys
 
 
-# Main function - create the clusters from a given input
-def k_means(k, file_name, max_iter=200):
-    vectors = read_file(file_name)
-    d = len(vectors[0])
-    mu = initialize(vectors, k)
-    assert 1 < k < len(vectors)
-    for i in range(max_iter):
-        new_mu = calc_new_centroids(vectors, mu, k, d)
-        epsilon = calc_eps(mu, new_mu)
-        if epsilon < 0.001:
-            break
-        mu = new_mu.copy()
-    output_filename = "output_" + file_name
-    create_output(mu, output_filename)
-    return
+def validate(condition):
+    if not condition:
+        print('Invalid Input!')
+        exit(1)
 
 
 # Open the file and create array of vectors
@@ -60,7 +50,7 @@ def calc_new_centroids(vectors, mu, k, d):
     for i in range(k):
         for j in range(d):
             if count_by_mu[i] != 0:
-                sum_by_mu[i][j] = sum_by_mu[i][j]/count_by_mu[i]
+                sum_by_mu[i][j] = sum_by_mu[i][j] / count_by_mu[i]
             else:
                 sum_by_mu[i][j] = mu[i][j]
     return sum_by_mu
@@ -95,7 +85,22 @@ def create_output(mu, op_file_name):
         output.write("\n")
 
 
-k_means(3, "input_1.txt", 100)
-k_means(7, "input_2.txt")
-k_means(15, "input_3.txt", 300)
-
+args = sys.argv[1:]
+validate(3 <= len(args) <= 4)
+k, max_iter, input_filename, output_filename = args[0], args[1] if len(args) == 4 else 200, args[-2], args[-1]
+validate(args[0].isdigit())
+if len(args) == 4:
+    validate(max_iter.isdigit())
+    max_iter = int(max_iter)
+k = int(k)
+vectors = read_file(input_filename)
+d = len(vectors[0])
+mu = initialize(vectors, k)
+validate(1 < k < len(vectors))
+for i in range(max_iter):
+    new_mu = calc_new_centroids(vectors, mu, k, d)
+    epsilon = calc_eps(mu, new_mu)
+    if epsilon < 0.001:
+        break
+    mu = new_mu.copy()
+create_output(mu, output_filename)
