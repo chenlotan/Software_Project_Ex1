@@ -105,13 +105,12 @@ double **read_file(char fileName[]) {
 }
 
 double compute_distance(double vec1[], double vec2[]) {
-    double sum = 0, dist;
+    double sum = 0;
     int i;
     for (i = 0; i < dimension; i++) {
         sum += (double) pow(vec1[i] - vec2[i], 2);
     }
-    dist = (double) pow(sum, 0.5);
-    return dist;
+    return sum;
 }
 
 int find_dimension(char line[]) {

@@ -69,7 +69,7 @@ def calc_eps(old_mu, new_mu):
 # Compute distance between two given vectors
 def compute_distance(vec1, vec2):
     assert len(vec1) == len(vec2)
-    dist = "%.4f" % ((sum([(vec1[i] - vec2[i]) ** 2 for i in range(len(vec1))])) ** 0.5)
+    dist = "%.4f" % (sum([(vec1[i] - vec2[i]) ** 2 for i in range(len(vec1))]))
     return float(dist)
 
 
@@ -100,7 +100,7 @@ validate(1 < k < len(vectors))
 for i in range(max_iter):
     new_mu = calc_new_centroids(vectors, mu, k, d)
     epsilon = calc_eps(mu, new_mu)
-    if epsilon < 0.001:
+    if epsilon < 0.000001:
         break
     mu = new_mu.copy()
 create_output(mu, output_filename)
