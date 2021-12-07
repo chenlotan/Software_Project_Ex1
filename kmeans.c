@@ -169,7 +169,7 @@ int calc_argmin(double *mu[], double *vector) {
 void reset_clusters(double **vectors_list, double *mu[], double *new_sum[]) {
     int *count;
     double *vec;
-    int i, t, j, r, s, q, z, min_mu;
+    int t, j, r, s, q, min_mu;
     count = calloc(k, sizeof(int));
 
     for (t = 0; t < N; t++) {
