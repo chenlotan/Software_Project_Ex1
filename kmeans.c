@@ -13,7 +13,7 @@ void number_of_vectors(char fileName[]);
 
 void find_dimension(char line[]);
 
-void initialize(double **vectors_list, double *mu[]);
+void initialize(double **vectors_list, double *mu[], double *new_mu[]);
 
 double compute_distance(double vec1[], double vec2[]);
 
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     char *input_file = argv[argc - 2];
     char *output_file = argv[argc - 1];
     int max_iter = 200;
-    int i, j;
+    int i, j, q;
     double eps;
     double **new_mu, **mu;
     double **vectors_list;
@@ -47,12 +47,15 @@ int main(int argc, char *argv[]) {
     }
     mu = (double **) malloc(k * sizeof(double *));
     new_mu = (double **) malloc(k * sizeof(double *));
-    initialize(vectors_list, mu);
+    initialize(vectors_list, mu, new_mu);
     for (i = 0; i < max_iter; ++i) {
         reset_clusters(vectors_list, mu, new_mu);
         eps = calculating_epsilon(mu, new_mu);
         for (j = 0; j < k; ++j) {
-            mu[j] = new_mu[j];
+            for (q=0; q<dimension; ++q){
+                mu[j][q] = new_mu[j][q];
+                new_mu[j][q] = 0;
+            }
         }
         if (eps < 0.000001) {
             break;
@@ -117,7 +120,7 @@ void find_dimension(char line[]) {
     dimension = i;
 }
 
-/* checks how many vectors we get*/
+
 void number_of_vectors(char fileName[]){
     FILE *file = fopen(fileName, "r");
     char buff[1024];
@@ -134,14 +137,19 @@ void number_of_vectors(char fileName[]){
     fclose(file);
 }
 
-void initialize(double **vectors_list, double *mu[]) {
-    int i;
+void initialize(double **vectors_list, double *mu[], double *new_mu[]) {
+    int i, j;
     double *vec;
     for (i = 0; i < k; ++i) {
         mu[i] = (double *) calloc(dimension, sizeof(double));
+        new_mu[i] = (double *) calloc(dimension, sizeof(double));
         check_allocation(mu[i]);
+        check_allocation(new_mu[i]);
         vec = vectors_list[i];
-        mu[i] = vec;
+        for (j = 0; j < dimension; j++)
+        {
+            mu[i][j] = vec[j];
+        }
     }
 }
 
@@ -161,14 +169,9 @@ int calc_argmin(double *mu[], double *vector) {
 void reset_clusters(double **vectors_list, double *mu[], double *new_sum[]) {
     int *count;
     double *vec;
-    int i, t, j, r, s, q, min_mu;
+    int i, t, j, r, s, q, z, min_mu;
     count = calloc(k, sizeof(int));
 
-    for (i = 0; i < k; ++i) {
-        new_sum[i] = (double *) calloc(dimension, sizeof(double));
-        check_allocation(new_sum[i]);
-        count[i] = 0;
-    }
     for (t = 0; t < N; t++) {
         min_mu = calc_argmin(mu, vectors_list[t]);
         count[min_mu]++;
