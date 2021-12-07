@@ -9,7 +9,9 @@ int dimension, k, N;
 
 double **read_file(char fileName[]);
 
-int find_dimension(char line[]);
+void number_of_vectors(char fileName[]);
+
+void find_dimension(char line[]);
 
 void initialize(double **vectors_list, double *mu[]);
 
@@ -32,7 +34,9 @@ int main(int argc, char *argv[]) {
     int i, j;
     double eps;
     double **new_mu, **mu;
-    double **vectors_list = read_file(input_file);
+    double **vectors_list;
+    number_of_vectors(input_file);
+    vectors_list = read_file(input_file);
     k = (int) strtol(argv[1], NULL, 10);
     if (argc == 5) {
         max_iter = (int) strtol(argv[2], NULL, 10);
@@ -64,15 +68,13 @@ int main(int argc, char *argv[]) {
 
 double **read_file(char fileName[]) {
     FILE *file = fopen(fileName, "r");
-    char buff[1024], copy_buff[1024], *ptr;
-    int ch, max_size = 100, n = 0;
+    char buff[1024], *ptr;
+    int ch, i = 0;
     double *vector, *place;
     double **all_vectors;
     if (file) {
-        all_vectors = (double **) malloc(max_size * sizeof(double *));
+        all_vectors = (double **) malloc(N * sizeof(double *));
         ch = fscanf(file, "%s", buff);
-        strcpy(copy_buff, buff);
-        dimension = find_dimension(copy_buff);
         while ((ch != '\n') && (ch != EOF)) {
             vector = (double *) (malloc(dimension * sizeof(double)));
             check_allocation(vector);
@@ -83,19 +85,11 @@ double **read_file(char fileName[]) {
                 ptr = strtok(NULL, ",");
                 vector++;
             }
-            if (n >= max_size) {
-                max_size *= 2;
-                all_vectors = (double **) realloc(all_vectors, max_size * sizeof(double *));
-            }
-            all_vectors[n] = place;
-            n++;
+            all_vectors[i] = place;
+            i++;
             ch = fscanf(file, "%s", buff);
         }
         fclose(file);
-        if (n < max_size) {
-            all_vectors = (double **) realloc(all_vectors, n * sizeof(double *));
-        }
-        N = n;
         return all_vectors;
     } else {
         printf("Invalid Input!");
@@ -113,14 +107,31 @@ double compute_distance(double vec1[], double vec2[]) {
     return sum;
 }
 
-int find_dimension(char line[]) {
+void find_dimension(char line[]) {
     int i = 0;
     char *ptr = strtok(line, ",");
     while (ptr != NULL) {
         ptr = strtok(NULL, ",");
         i++;
     }
-    return i;
+    dimension = i;
+}
+
+/* checks how many vectors we get*/
+void number_of_vectors(char fileName[]){
+    FILE *file = fopen(fileName, "r");
+    char buff[1024];
+    int ch, n = 0;
+    ch = fscanf(file, "%s", buff);
+    while((ch != 'n') && (ch != EOF)){
+        if (n == 0){
+            find_dimension(buff);
+        }
+        n++;
+        ch = fscanf(file, "%s", buff);
+    }
+    N = n;
+    fclose(file);
 }
 
 void initialize(double **vectors_list, double *mu[]) {
